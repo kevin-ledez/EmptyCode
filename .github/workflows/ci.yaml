@@ -1,0 +1,70 @@
+name: Continuous integration
+on:
+  pull_request:
+    branches: [dev]
+
+jobs:
+  api-tests:
+    runs-on: ubuntu-latest
+    container: noyunice/apiplatform-dev-php:8.2-apache
+    defaults:
+      run:
+        working-directory: api
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      - name: Install Dependencies
+        run:
+          symfony composer install --no-interaction
+
+      - name: Security Checker
+        run:
+          ./api-scripts.sh security-checker
+
+      - name: PHP_CodeSniffer
+        run:
+          ./api-scripts.sh phpcs
+
+      - name: PHPStan
+        run:
+          ./api-scripts.sh phpstan
+
+      - name: PHPUnit
+        run:
+          ./api-scripts.sh phpunit
+
+  client-tests:
+    runs-on: ubuntu-latest
+    container: noyunice/angular-dev-node:lts
+    defaults:
+      run:
+        working-directory: client
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run:
+          npm install
+
+      - name: Security audit
+        run:
+          ./client-scripts.sh audit
+
+      - name: ESLint
+        run:
+          ./client-scripts.sh eslint
+
+      - name: Jest
+        run:
+          ./client-scripts.sh jest

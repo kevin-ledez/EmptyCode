@@ -1,0 +1,9 @@
+{
+    "scripts": {
+        "app": "clear && docker exec -it my_app sh -c ./api-scripts.sh",
+        "---- Docker ----": "",
+        "docker-start": "clear && docker-compose -f compose.dev.yml up -d --build && docker logs --tail 1000 --follow my_app --details",
+        "docker-stop": "clear && docker-compose -f compose.dev.yml down",
+        "docker-clear-cache": "clear && docker-compose -f compose.dev.yml build --no-cache"
+    }
+}
