@@ -2,4 +2,4 @@
 
 ## Authors
 
-* [Nicolas Herbez](https://github.com/nicolas-herbez)
+* [Kévin LEDEZ](https://github.com/kevin-ledez)
