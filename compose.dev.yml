@@ -1,0 +1,61 @@
+version: '3'
+
+services:
+    app:
+        container_name: my_app
+        build:
+            context: ./docker/dev/app/
+            dockerfile: ./Dockerfile
+            # tags:
+            #   - "noyunice/apiplatform-dev-php:8.2-apache"
+        restart: always
+        ports:
+            - 8000:8000
+        volumes:
+            - ./app/:/var/www
+            #- api-var:/var/www/var
+            #- api-vendor:/var/www/vendor
+        networks:
+            - net_app
+        depends_on:
+            database:
+                condition: service_healthy
+
+    database:
+        container_name: my_app-database
+        image: mysql:latest
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: my_app
+        ports:
+            - 3306
+        volumes:
+            - db-data:/var/lib/mysql
+        networks:
+            - net_app
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$MYSQL_ROOT_PASSWORD"]
+            interval: 10s
+            timeout: 10s
+            retries: 5
+
+    phpmyadmin:
+        container_name: my_app-phpmyadmin
+        image: phpmyadmin:latest
+        restart: always
+        ports:
+            - 8001:80
+        environment:
+            - PMA_HOST=database
+        networks:
+            - net_app
+
+volumes:
+    db-data:
+    #api-var:
+    #api-vendor:
+    #client-node_modules:
+
+networks:
+    net_app:
